@@ -7,16 +7,38 @@ public class UserDao {
 
     public User get(Long id) throws ClassNotFoundException, SQLException {
         Connection connection = connectionMaker.getConnection();
-        // 쿼리만들고
+        StatementStrategy statementStrategy = new GetStatementStrategy(id);
+        User user = jdbcWithStatementForGet(connection, statementStrategy);
+        return user;
+    }
+
+    public Long add(User user) throws ClassNotFoundException, SQLException {
+        Connection connection = connectionMaker.getConnection();
+        StatementStrategy statementStrategy = new AddStatementStrategy(user);
+        Long id = jdbcWithStatementForAdd(connection, statementStrategy);
+        return id;
+    }
+
+    public void update(User user) throws SQLException, ClassNotFoundException {
+        Connection connection = connectionMaker.getConnection();
+        StatementStrategy statementStrategy = new UpdateStatementStrategy(user);
+        jdbcWithStatementForUpdate(connection, statementStrategy);
+    }
+
+    public void delete(Long id) throws SQLException, ClassNotFoundException {
+        Connection connection = connectionMaker.getConnection();
+        StatementStrategy statementStrategy = new DeleteStatementStrategy(id);
+        jdbcWithStatementForUpdate(connection, statementStrategy);
+    }
+
+    private User jdbcWithStatementForGet(Connection connection, StatementStrategy statementStrategy) throws SQLException {
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         User user = null;
         try {
-            preparedStatement = connection.prepareStatement("select * from userinfo where id = ?");
-            preparedStatement.setLong(1, id);
-            // 실행
+            preparedStatement = statementStrategy.makeStatement(connection);
             resultSet = preparedStatement.executeQuery();
-            // 결과매핑
+
             if(resultSet.next()) {
                 user = new User();
                 user.setId(resultSet.getLong("id"));
@@ -49,20 +71,14 @@ public class UserDao {
                 }
             }
         }
-
         return user;
     }
 
-    public Long add(User user) throws ClassNotFoundException, SQLException {
-        Connection connection = connectionMaker.getConnection();
-        // 쿼리만들고
+    private Long jdbcWithStatementForAdd(Connection connection, StatementStrategy statementStrategy) throws ClassNotFoundException, SQLException {
         PreparedStatement preparedStatement = null;
         Long id = null;
         try {
-            preparedStatement = connection.prepareStatement("insert into userinfo (name, password) values (?, ?)");
-            preparedStatement.setString(1, user.getName());
-            preparedStatement.setString(2, user.getPassword());
-            // 실행
+            preparedStatement = statementStrategy.makeStatement(connection);
             preparedStatement.executeUpdate();
 
             id = getLastInsertId(connection);
@@ -85,20 +101,13 @@ public class UserDao {
                 }
             }
         }
-
         return id;
     }
 
-    public void update(User user) throws SQLException, ClassNotFoundException {
-        Connection connection = connectionMaker.getConnection();
-        // 쿼리만들고
+    private void jdbcWithStatementForUpdate(Connection connection, StatementStrategy statementStrategy) throws SQLException {
         PreparedStatement preparedStatement = null;
         try {
-            preparedStatement = connection.prepareStatement("update userinfo set name = ?, password = ? where id = ?");
-            preparedStatement.setString(1, user.getName());
-            preparedStatement.setString(2, user.getPassword());
-            preparedStatement.setLong(3, user.getId());
-            // 실행
+            preparedStatement = statementStrategy.makeStatement(connection);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -121,37 +130,7 @@ public class UserDao {
         }
     }
 
-    public void delete(Long id) throws SQLException, ClassNotFoundException {
-        Connection connection = connectionMaker.getConnection();
-        // 쿼리만들고
-        PreparedStatement preparedStatement = null;
-        try {
-            preparedStatement = connection.prepareStatement("delete from userinfo where id = ?");
-            preparedStatement.setLong(1, id);
-            // 실행
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw e;
-        } finally {
-            if(preparedStatement != null) {
-                try {
-                    preparedStatement.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-            if(connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    public Long getLastInsertId(Connection connection) throws SQLException, ClassNotFoundException {
+    private Long getLastInsertId(Connection connection) throws SQLException, ClassNotFoundException {
         PreparedStatement preparedStatement = connection.prepareStatement("select last_insert_id()");
         ResultSet resultSet = preparedStatement.executeQuery();
         resultSet.next();
