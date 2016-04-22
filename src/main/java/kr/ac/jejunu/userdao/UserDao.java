@@ -6,32 +6,29 @@ public class UserDao {
     private ConnectionMaker connectionMaker;
 
     public User get(Long id) throws ClassNotFoundException, SQLException {
-        Connection connection = connectionMaker.getConnection();
         StatementStrategy statementStrategy = new GetStatementStrategy(id);
-        User user = jdbcWithStatementForGet(connection, statementStrategy);
+        User user = jdbcWithStatementForGet(statementStrategy);
         return user;
     }
 
     public Long add(User user) throws ClassNotFoundException, SQLException {
-        Connection connection = connectionMaker.getConnection();
         StatementStrategy statementStrategy = new AddStatementStrategy(user);
-        Long id = jdbcWithStatementForAdd(connection, statementStrategy);
+        Long id = jdbcWithStatementForAdd(statementStrategy);
         return id;
     }
 
     public void update(User user) throws SQLException, ClassNotFoundException {
-        Connection connection = connectionMaker.getConnection();
         StatementStrategy statementStrategy = new UpdateStatementStrategy(user);
-        jdbcWithStatementForUpdate(connection, statementStrategy);
+        jdbcWithStatementForUpdate(statementStrategy);
     }
 
     public void delete(Long id) throws SQLException, ClassNotFoundException {
-        Connection connection = connectionMaker.getConnection();
         StatementStrategy statementStrategy = new DeleteStatementStrategy(id);
-        jdbcWithStatementForUpdate(connection, statementStrategy);
+        jdbcWithStatementForUpdate(statementStrategy);
     }
 
-    private User jdbcWithStatementForGet(Connection connection, StatementStrategy statementStrategy) throws SQLException {
+    private User jdbcWithStatementForGet(StatementStrategy statementStrategy) throws SQLException, ClassNotFoundException {
+        Connection connection = connectionMaker.getConnection();
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         User user = null;
@@ -74,7 +71,8 @@ public class UserDao {
         return user;
     }
 
-    private Long jdbcWithStatementForAdd(Connection connection, StatementStrategy statementStrategy) throws ClassNotFoundException, SQLException {
+    private Long jdbcWithStatementForAdd(StatementStrategy statementStrategy) throws ClassNotFoundException, SQLException {
+        Connection connection = connectionMaker.getConnection();
         PreparedStatement preparedStatement = null;
         Long id = null;
         try {
@@ -104,7 +102,8 @@ public class UserDao {
         return id;
     }
 
-    private void jdbcWithStatementForUpdate(Connection connection, StatementStrategy statementStrategy) throws SQLException {
+    private void jdbcWithStatementForUpdate(StatementStrategy statementStrategy) throws SQLException, ClassNotFoundException {
+        Connection connection = connectionMaker.getConnection();
         PreparedStatement preparedStatement = null;
         try {
             preparedStatement = statementStrategy.makeStatement(connection);
