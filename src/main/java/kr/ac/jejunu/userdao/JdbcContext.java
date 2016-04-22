@@ -87,11 +87,8 @@ public class JdbcContext {
         return id;
     }
 
-    void jdbcWithStatementForUpdate(StatementStrategy statementStrategy) throws SQLException, ClassNotFoundException {
-        Connection connection = dataSource.getConnection();
-        PreparedStatement preparedStatement = null;
+    void jdbcWithStatementForUpdate(Connection connection, PreparedStatement preparedStatement) throws SQLException, ClassNotFoundException {
         try {
-            preparedStatement = statementStrategy.makeStatement(connection);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -112,6 +109,15 @@ public class JdbcContext {
                 }
             }
         }
+    }
+
+    void update(String sql, Object[] objects) throws SQLException, ClassNotFoundException {
+        Connection connection = dataSource.getConnection();
+        PreparedStatement statement = connection.prepareStatement(sql);
+        for(int i = 1; i <= objects.length; ++i) {
+            statement.setObject(i, objects[i-1]);
+        }
+        jdbcWithStatementForUpdate(connection, statement);
     }
 
     Long getLastInsertId(Connection connection) throws SQLException, ClassNotFoundException {
