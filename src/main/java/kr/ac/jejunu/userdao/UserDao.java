@@ -24,6 +24,7 @@ public class UserDao {
             user.setPassword(resultSet.getString("password"));
         } catch (SQLException e) {
             e.printStackTrace();
+            throw e;
         } finally {
             if(resultSet != null) {
                 try {
@@ -66,6 +67,7 @@ public class UserDao {
             id = getLastInsertId(connection);
         } catch (SQLException e) {
             e.printStackTrace();
+            throw e;
         } finally {
             if(preparedStatement != null) {
                 try {
