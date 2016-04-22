@@ -88,6 +88,38 @@ public class UserDao {
         return id;
     }
 
+    public void update(User user) throws SQLException, ClassNotFoundException {
+        Connection connection = connectionMaker.getConnection();
+        // 쿼리만들고
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = connection.prepareStatement("update userinfo set name = ?, password = ? where id = ?");
+            preparedStatement.setString(1, user.getName());
+            preparedStatement.setString(2, user.getPassword());
+            preparedStatement.setLong(3, user.getId());
+            // 실행
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw e;
+        } finally {
+            if(preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
     public Long getLastInsertId(Connection connection) throws SQLException, ClassNotFoundException {
         PreparedStatement preparedStatement = connection.prepareStatement("select last_insert_id()");
         ResultSet resultSet = preparedStatement.executeQuery();
