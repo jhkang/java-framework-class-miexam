@@ -1,18 +1,19 @@
 package kr.ac.jejunu.userdao;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class JdbcContext {
-    ConnectionMaker connectionMaker;
+    private DataSource dataSource;
 
     public JdbcContext() {
     }
 
     User jdbcWithStatementForGet(StatementStrategy statementStrategy) throws SQLException, ClassNotFoundException {
-        Connection connection = connectionMaker.getConnection();
+        Connection connection = dataSource.getConnection();
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         User user = null;
@@ -56,7 +57,7 @@ public class JdbcContext {
     }
 
     Long jdbcWithStatementForAdd(StatementStrategy statementStrategy) throws ClassNotFoundException, SQLException {
-        Connection connection = connectionMaker.getConnection();
+        Connection connection = dataSource.getConnection();
         PreparedStatement preparedStatement = null;
         Long id = null;
         try {
@@ -87,7 +88,7 @@ public class JdbcContext {
     }
 
     void jdbcWithStatementForUpdate(StatementStrategy statementStrategy) throws SQLException, ClassNotFoundException {
-        Connection connection = connectionMaker.getConnection();
+        Connection connection = dataSource.getConnection();
         PreparedStatement preparedStatement = null;
         try {
             preparedStatement = statementStrategy.makeStatement(connection);
@@ -120,7 +121,7 @@ public class JdbcContext {
         return resultSet.getLong(1);
     }
 
-    public void setConnectionMaker(ConnectionMaker connectionMaker) {
-        this.connectionMaker = connectionMaker;
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 }
