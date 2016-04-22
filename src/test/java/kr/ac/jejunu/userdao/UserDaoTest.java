@@ -3,6 +3,7 @@ package kr.ac.jejunu.userdao;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.support.GenericXmlApplicationContext;
 
 import java.sql.SQLException;
 
@@ -10,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 
 public class UserDaoTest {
     private UserDao getUserDao() {
-        ApplicationContext applicationContext = new AnnotationConfigApplicationContext(DaoFactory.class);
+        ApplicationContext applicationContext = new GenericXmlApplicationContext("daoFactory.xml");
         return (UserDao) applicationContext.getBean("userDao");
     }
 
