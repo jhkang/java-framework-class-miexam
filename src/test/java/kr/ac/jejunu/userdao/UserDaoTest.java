@@ -1,15 +1,22 @@
 package kr.ac.jejunu.userdao;
 
 import org.junit.Test;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.sql.SQLException;
 
 import static org.junit.Assert.assertEquals;
 
 public class UserDaoTest {
+    private UserDao getUserDao() {
+        ApplicationContext applicationContext = new AnnotationConfigApplicationContext(DaoFactory.class);
+        return (UserDao) applicationContext.getBean("userDao");
+    }
+
     @Test
     public void get() throws SQLException, ClassNotFoundException {
-        UserDao userDao = new DaoFactory().getUserDao();
+        UserDao userDao = getUserDao();
         Long id = 1L;
         String name = "허윤호";
         String password = "1234";
@@ -29,7 +36,7 @@ public class UserDaoTest {
         user.setName(name);
         user.setPassword(password);
 
-        UserDao userDao = new DaoFactory().getUserDao();
+        UserDao userDao = getUserDao();
         Long id = userDao.add(user);
 
         user = userDao.get(id);
